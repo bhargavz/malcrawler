@@ -8,7 +8,7 @@ import urlparse
 
 from selenium import webdriver
 
-def load_driver(output_dir):
+def load_driver(output_dir, download_dir):
     home_dir = os.path.expanduser("~")
     add_on_dir = os.path.join(home_dir, '.harcollector')
     firebug = os.path.join(add_on_dir, 'firebug-2.0.12-fx.xpi')
@@ -29,7 +29,7 @@ def load_driver(output_dir):
     profile.set_preference('extensions.firebug.netexport.saveFiles', True)
     profile.set_preference('browser.download.folderList', 2)
     profile.set_preference('browser.download.manager.showWhenStarting', False)
-    profile.set_preference('browser.download.dir', output_dir)
+    profile.set_preference('browser.download.dir', download_dir)
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/x-msdownload')
 
     driver = webdriver.Firefox(profile)
@@ -59,7 +59,9 @@ for url in urls:
     timestamp = datetime.datetime.utcnow().isoformat()
     directory = '{}.{}'.format(timestamp, hostname)
     dir_path = os.path.join(working_dir, directory)
+    download_dir = os.path.join(dir_path, 'download')
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    driver = load_driver(dir_path)
+        os.makedirs(download_dir)
+    driver = load_driver(dir_path, download_dir)
     visit_url(driver, url)
