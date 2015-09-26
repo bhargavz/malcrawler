@@ -58,3 +58,8 @@ target/
 
 # HAR output directories
 20*/
+
+# HAR, MAEC, STIX files
+*.har
+*.maec
+*.stix
