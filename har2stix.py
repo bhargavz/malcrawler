@@ -79,8 +79,15 @@ class Har2Stix(object):
     def parse_har(self, har_data):
         entries = list()
         for entry in har_data['log']['entries']:
-            indicator_data = {'ip': entry['serverIPAddress']}
-            indicator_data['url'] = entry['request']['url']
+            indicator_data = dict()
+            try:
+                indicator_data['ip'] = entry['serverIPAddress']
+            except KeyError:
+                pass
+            try:
+                indicator_data['url'] = entry['request']['url']
+            except KeyError:
+                pass
             for header in entry['request']['headers']:
                 if header['name'] == 'Host':
                     indicator_data['host'] = header['value']
@@ -100,9 +107,18 @@ class Har2Stix(object):
 
         stix_indicators = list()
         for entry in indicator_list:
-            stix_indicators.append(self.create_url_indicator(entry['url']))
-            stix_indicators.append(self.create_ip_indicator(entry['ip']))
-            stix_indicators.append(self.create_host_indicator(entry['host']))
+            try:
+                stix_indicators.append(self.create_url_indicator(entry['url']))
+            except KeyError:
+                pass
+            try:
+                stix_indicators.append(self.create_ip_indicator(entry['ip']))
+            except KeyError:
+                pass
+            try:
+                stix_indicators.append(self.create_host_indicator(entry['host']))
+            except KeyError:
+                pass
 
         stix_package = self.init_stix()
 
