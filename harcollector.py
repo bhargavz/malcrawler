@@ -33,6 +33,7 @@ def load_driver(output_dir, download_dir):
     profile.set_preference('browser.download.manager.showWhenStarting', False)
     profile.set_preference('browser.download.dir', download_dir)
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/x-msdownload')
+    profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/octet-stream')
 
     driver = webdriver.Firefox(profile)
     time.sleep(10)
