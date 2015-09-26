@@ -8,6 +8,8 @@ import urlparse
 
 from selenium import webdriver
 
+from har2stix import Har2Stix
+
 def load_driver(output_dir, download_dir):
     home_dir = os.path.expanduser("~")
     add_on_dir = os.path.join(home_dir, '.harcollector')
@@ -41,6 +43,14 @@ def visit_url(driver, url):
     time.sleep(120)
     driver.quit()
 
+def translate_har(har_dir):
+    h2s = Har2Stix(har_dir)
+    for root, dirs, files in os.walk(har_dir):
+        har_files = files
+        break
+    for har_file in har_files:
+        h2s.run(os.path.join(har_dir, har_file))
+
 description = 'Tool for crawling a list of URLs and generate a HAR file for each one'
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('list_file', metavar='LIST', help='File containing the list of URLs to crawl')
@@ -65,3 +75,4 @@ for url in urls:
         os.makedirs(download_dir)
     driver = load_driver(dir_path, download_dir)
     visit_url(driver, url)
+    translate_har(dir_path)
