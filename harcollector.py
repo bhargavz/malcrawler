@@ -10,15 +10,12 @@ from selenium import webdriver
 
 from har2stix import Har2Stix
 
-def load_driver(output_dir, download_dir):
-    home_dir = os.path.expanduser("~")
-    add_on_dir = os.path.join(home_dir, '.harcollector')
-    firebug = os.path.join(add_on_dir, 'firebug-2.0.12-fx.xpi')
-    netexport = os.path.join(add_on_dir, 'netExport-0.9b7.xpi')
-
+def load_driver(extensions, mime_types, output_dir, download_dir):
     profile = webdriver.FirefoxProfile()
-    profile.add_extension(firebug)
-    profile.add_extension(netexport)
+
+    for extension in extensions:
+        profile.add_extension(extension)
+
     profile.set_preference('extensions.firebug.allPagesActivation', 'on')
     profile.set_preference('extensions.firebug.defaultPanelName', 'net')
     profile.set_preference('extensions.firebug.net.enableSites', True)
@@ -32,9 +29,9 @@ def load_driver(output_dir, download_dir):
     profile.set_preference('browser.download.folderList', 2)
     profile.set_preference('browser.download.manager.showWhenStarting', False)
     profile.set_preference('browser.download.dir', download_dir)
-    profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/x-msdownload')
-    profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/octet-stream')
-    profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'application/x-msdos-program')
+
+    for mime_type in mime_types:
+        profile.set_preference('browser.helperApps.neverAsk.saveToDisk', mime_type)
 
     driver = webdriver.Firefox(profile)
     time.sleep(10)
@@ -65,6 +62,17 @@ list_file = os.path.join(working_dir, args.list_file)
 list_fh = open(list_file, 'r')
 urls = list_fh.read().splitlines()
 
+home_dir = os.path.expanduser("~")
+conf_dir = os.path.join(home_dir, '.harcollector')
+firebug = os.path.join(conf_dir, 'firebug-2.0.12-fx.xpi')
+netexport = os.path.join(conf_dir, 'netExport-0.9b7.xpi')
+
+extensions = [firebug, netexport]
+
+mime_types_file = os.path.join(conf_dir, 'mime.types')
+mt_fh = open('mime_types_file', 'r')
+mime_types = mt_fh.read().splitlines()
+
 for url in urls:
     parsed_url = urlparse.urlparse(url)
     hostname = parsed_url.netloc
@@ -75,6 +83,6 @@ for url in urls:
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
         os.makedirs(download_dir)
-    driver = load_driver(dir_path, download_dir)
+    driver = load_driver(extensions, mime_types, dir_path, download_dir)
     visit_url(driver, url)
     translate_har(dir_path)
