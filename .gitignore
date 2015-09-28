@@ -63,3 +63,6 @@ target/
 *.har
 *.maec
 *.stix
+
+# Target list
+urls.txt
